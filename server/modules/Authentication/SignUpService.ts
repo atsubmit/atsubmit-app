@@ -1,0 +1,67 @@
+import { lazyPoolExecute } from "@server/db/pool";
+import { MainContext } from "@server/types";
+import { User } from "./User";
+
+export const verifyCanSignUpWithEmail = async (
+    c: MainContext,
+    email: string,
+) => {
+    const result = await lazyPoolExecute(c, async (client) => {
+        return client.query<Pick<User, "email">>(
+            `
+            select
+                u.email
+            from users u
+            where
+                u.deleted_at is null
+                AND u.email = $1
+        `,
+            [email],
+        );
+    });
+
+    return result.rowCount === 0;
+};
+
+export const emailSignupService = async (
+    c: MainContext,
+    credential: {
+        email: string;
+        password: string;
+    },
+) => {
+    await lazyPoolExecute(c, async (client) => {
+        await client.query("BEGIN");
+        try {
+            await client.query<Pick<User, "email">>(
+                `
+				WITH new_user AS (
+					INSERT INTO users
+						(email, email_verified)
+					VALUES
+						($1, FALSE)
+					RETURNING id
+				)
+
+				INSERT INTO auth_identities (
+					user_id,
+					provider,
+					password_hash
+				)
+				SELECT
+					id,
+					$2,
+					crypt($3, gen_salt('bf'))
+				FROM new_user;
+        	`,
+                [credential.email, "email", credential.password],
+            );
+
+            await client.query("COMMIT");
+        } catch (e) {
+            await client.query("ROLLBACK");
+
+            throw e;
+        }
+    });
+};

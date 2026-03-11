@@ -20,7 +20,8 @@
 		"simple-icons": "^16.11.0",
 		"tailwindcss": "^4.2.1",
 		"vue": "^3.5.29",
-		"vue-router": "^5.0.3"
+		"vue-router": "^5.0.3",
+		"zod": "^4.3.6"
 	},
 	"devDependencies": {
 		"@cloudflare/vite-plugin": "^1.26.1",

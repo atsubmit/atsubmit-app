@@ -7,14 +7,33 @@ CREATE TABLE forms (
 
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 
+    -- info
     name VARCHAR(255) NOT NULL,
-
     endpoint_slug VARCHAR(100) UNIQUE NOT NULL,
     submit_token TEXT NOT NULL,
-    allowed_domains TEXT[] NOT NULL,
 
-    notification_email VARCHAR(255),
 
+    -- domain policy
+    allowed_domains TEXT[],
+    disallowed_domains TEXT[],
+
+    -- submission processing defaults
+    honeypot_enabled BOOLEAN,
+    honeypot_class_name VARCHAR(64),
+    honeypot_input_name VARCHAR(64),
+    honeypot_hidden_style VARCHAR(50),
+
+    spam_filter_enabled BOOLEAN,
+
+    -- notification defaults
+    notification_enabled BOOLEAN,
+
+    notification_frequency VARCHAR(20),
+    notification_via_email BOOLEAN,
+
+    notification_email_recipients TEXT[],
+
+    -- state
     is_active BOOLEAN DEFAULT TRUE,
 
     created_at TIMESTAMP NOT NULL DEFAULT now(),

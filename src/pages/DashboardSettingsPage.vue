@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import DashboardHeader from "@/components/dashboard/DashboardHeader.vue";
 
-import type { DashboardSettingsTab, DashboardSettingsTabId } from "./DashboardSettingsPage.types";
+import type {
+    DashboardSettingsTab,
+    DashboardSettingsTabId,
+} from "./DashboardSettingsPage.types";
 
 import { User, Shield, Globe, Bell } from "lucide-vue-next";
-import { computed } from "vue";
+import { onMounted, useTemplateRef } from "vue";
 
 const props = defineProps<{ tab: DashboardSettingsTabId }>();
 
+const refAnchors = useTemplateRef("refAnchors");
 const tabs: DashboardSettingsTab[] = [
     {
         id: "profile",
@@ -35,12 +39,21 @@ const tabs: DashboardSettingsTab[] = [
     },
 ];
 
-const currentTabId = computed(() => {
-    const path = location.pathname;
-    if (path.includes("processing")) return "processing";
-    if (path.includes("domains")) return "domains";
-    if (path.includes("notifications")) return "notifications";
-    return "profile";
+onMounted(() => {
+    const anchors = refAnchors.value;
+    if (anchors) {
+        for (let index = 0; index < anchors.length; index++) {
+            const element = anchors[index];
+            if (element && element.getAttribute("href") === location.pathname) {
+                element.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest", // prevents vertical scrolling
+                    inline: "center", // horizontal positioning
+                });
+                break;
+            }
+        }
+    }
 });
 </script>
 
@@ -54,6 +67,7 @@ const currentTabId = computed(() => {
         <div class="flex border-b border-border mb-8 overflow-x-auto">
             <a
                 v-for="tab in tabs"
+                ref="refAnchors"
                 :key="tab.name"
                 :href="tab.href"
                 class="flex items-center gap-2 px-6 py-4 text-sm font-medium border-b-2 transition-all whitespace-nowrap"

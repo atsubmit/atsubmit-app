@@ -249,6 +249,7 @@ function isParentActive(path: string) {
                             class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-background"
                         ></span>
                     </button>
+                    <DarkModeToggler />
 
                     <div class="h-6 w-px bg-border mx-2"></div>
 

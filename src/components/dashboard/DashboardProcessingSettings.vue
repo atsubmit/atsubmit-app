@@ -104,9 +104,9 @@ const { msg, errors } = useFormError(props.error);
                             }"
                             :error="errors.name"
                         >
-                            <template #default="{ classese, input }">
+                            <template #default="{ classes, input }">
                                 <input
-                                    :class="classese"
+                                    :class="classes"
                                     v-bind="input"
                                     v-model="inputName"
                                 />
@@ -122,9 +122,9 @@ const { msg, errors } = useFormError(props.error);
                             }"
                             :error="errors['hidden-style']"
                         >
-                            <template #default="{ classese, input }">
+                            <template #default="{ classes, input }">
                                 <select
-                                    :class="classese"
+                                    :class="classes"
                                     v-model="hiddenStyle"
                                     v-bind="input"
                                 >
@@ -160,9 +160,9 @@ const { msg, errors } = useFormError(props.error);
                             }"
                             :error="errors['hidden-classname']"
                         >
-                            <template #default="{ classese, input }">
+                            <template #default="{ classes, input }">
                                 <input
-                                    :class="classese"
+                                    :class="classes"
                                     v-bind="input"
                                     v-model="hiddenClassName"
                                 />

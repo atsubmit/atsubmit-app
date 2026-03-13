@@ -67,9 +67,9 @@ const { msg, errors } = useFormError(props.error);
                     }"
                     :error="errors.timezone"
                 >
-                    <template #default="{ classese, input }">
+                    <template #default="{ classes, input }">
                         <select
-                            :class="classese"
+                            :class="classes"
                             v-model="selectedTimezone"
                             v-bind="input"
                         >

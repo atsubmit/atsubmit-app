@@ -58,7 +58,7 @@ export const upsertProfileInfo = async (
 		SET
 			display_name = EXCLUDED.display_name,
 			timezone     = EXCLUDED.timezone,
-			updated_at   = now();
+			updated_at   = now()
 		WHERE
 			user_profiles.display_name IS DISTINCT FROM EXCLUDED.display_name
 			OR user_profiles.timezone  IS DISTINCT FROM EXCLUDED.timezone;

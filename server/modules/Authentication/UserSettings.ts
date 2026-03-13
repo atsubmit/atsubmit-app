@@ -41,6 +41,11 @@ export interface UserProcessingSettings extends UserHoneypotSettings {}
 
 export interface UserNotificationSettings {
     /**
+     * Notification enabled
+     */
+    default_notification_enabled?: boolean;
+
+    /**
      * Notification frequency
      * max length: 20
      */
@@ -52,19 +57,9 @@ export interface UserNotificationSettings {
     default_notification_via_email?: boolean;
 
     /**
-     * Notification email recipient
+     * Notification to those emails beside the owner
      */
-    default_notification_email_to?: string;
-
-    /**
-     * Notification CC emails
-     */
-    default_notification_email_cc?: string[];
-
-    /**
-     * Notification BCC emails
-     */
-    default_notification_email_bcc?: string[];
+    default_notification_email_recipients?: string[];
 }
 
 export interface UserSettings

@@ -25,12 +25,12 @@ CREATE TABLE user_settings (
     default_spam_filter_enabled BOOLEAN,
 
     -- notification defaults
+    default_notification_enabled BOOLEAN,
+
     default_notification_frequency VARCHAR(20),
     default_notification_via_email BOOLEAN,
 
-    default_notification_email_to TEXT,
-    default_notification_email_cc TEXT[],
-    default_notification_email_bcc TEXT[],
+    default_notification_email_recipients TEXT[],
 
     created_at TIMESTAMP NOT NULL DEFAULT now(),
     updated_at TIMESTAMP NOT NULL DEFAULT now()

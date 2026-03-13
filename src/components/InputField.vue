@@ -17,7 +17,7 @@
 
             <!-- input -->
             <slot
-                :classese="[
+                :classes="[
                     'w-full py-2.5 rounded-lg bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-apple-blue/50 transition-all',
                     $slots.prepend || icon ? 'pl-10' : 'pl-4',
                     $slots.append ? 'pr-10' : 'pr-4',

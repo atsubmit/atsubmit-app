@@ -6,6 +6,7 @@ import { validator } from "hono/validator";
 import { MainEnv } from "@server/types";
 import { CookiePayload } from "../Session/SessionTokenService";
 import { getSessionCookie } from "../Session/CookieService";
+import { getSessionService } from "../Session/SessionService";
 
 export const sessionGuardMiddleware = (options: {
     requireSession: boolean;
@@ -22,19 +23,20 @@ export const sessionGuardMiddleware = (options: {
         } catch (error) {
             console.log(c.get("reqId"), "sessionGuardMiddleware", error);
         }
-
         let valid = false;
 
         if (required) {
             const sid = payload?.sid;
-            if (sid) {
+            const session = sid ? await getSessionService(c, sid) : null;
+            if (session) {
                 valid = true;
 
                 c.set("sid", sid);
             }
         } else {
             const sid = payload?.sid;
-            if (!sid) {
+            const session = sid ? await getSessionService(c, sid) : null;
+            if (!session) {
                 valid = true;
             }
         }

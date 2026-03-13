@@ -25,6 +25,10 @@ import { addDefaultDomainService } from "@server/modules/DashboardDomainSettings
 import { deleteDefaultDomainBodyService } from "@server/modules/DashboardDomainSettings/DeleteDefaultDomainBodyService";
 import { deleteDefaultDomainService } from "@server/modules/DashboardDomainSettings/DeleteDefaultDomainService";
 import { getDefaultDomainService } from "@server/modules/DashboardDomainSettings/GetDefaultDomainService";
+import { NOTIFICATION_FREQUENT_RULES } from "@server/modules/DashboardNotificationSettings/GetDefaultNotificationFrequentRule";
+import { getDefaultNotificationSetting } from "@server/modules/DashboardNotificationSettings/GetDefaultNotificationSetting";
+import { updateDefaultNotificationBodyService } from "@server/modules/DashboardNotificationSettings/UpdateDefaultNotificationBodySetting";
+import { upsertDefaultNotificationSetting } from "@server/modules/DashboardNotificationSettings/UpdateDefaultNotificationSetting";
 import { honeypotSettingBodyService } from "@server/modules/DashboardProcessingSettings/HoneypotSettingsBodyService";
 import { getAccountHoneypotFormSetting } from "@server/modules/DashboardProcessingSettings/HoneypotSettingsService";
 import { validateProfileInfoBodyService } from "@server/modules/DashboardProfileSettings/ProfileInfoBodyService";
@@ -406,8 +410,91 @@ export const registerWebRoutes = (web: WebHono) => {
         );
     });
     dashboard.get("/settings/notifications", async (c) => {
-        return c.html(htmlPage(c, {}));
+        const sid = c.get("sid") || "";
+        const session = await getSessionService(c, sid);
+        if (!session) {
+            return c.html(
+                htmlPage(c, {
+                    httpStatus: 401,
+                }),
+            );
+        }
+
+        const result = await getDefaultNotificationSetting(c, session.user_id);
+        return c.html(
+            htmlPage(c, {
+                context: result
+                    ? {
+                          rules: NOTIFICATION_FREQUENT_RULES,
+                          enabled: !!result.default_notification_enabled,
+                          method: "email",
+                          frequency: "weekly",
+                          email_owner: session.user_email,
+                          email_recipients:
+                              result.default_notification_email_recipients,
+                      }
+                    : {
+                          rules: NOTIFICATION_FREQUENT_RULES,
+                          enabled: false,
+                      },
+            }),
+        );
     });
+    dashboard.post(
+        "/settings/notifications",
+        updateDefaultNotificationBodyService(),
+        async (c) => {
+            const sid = c.get("sid") || "";
+            const session = await getSessionService(c, sid);
+            if (!session) {
+                return c.html(
+                    htmlPage(c, {
+                        httpStatus: 401,
+                    }),
+                );
+            }
+
+            const form = await c.req.valid("form");
+            if (!form.error) {
+                await upsertDefaultNotificationSetting(c, {
+                    user_id: session.user_id,
+                    enabled: form.data.enabled,
+                    via_email: true,
+                    frequency: 'weekly',
+                    email_recipients: form.data["email-recipients"],
+                });
+            }
+
+            const result = await getDefaultNotificationSetting(
+                c,
+                session.user_id,
+            );
+            return c.html(
+                htmlPage(c, {
+                    context: result
+                        ? {
+                              rules: NOTIFICATION_FREQUENT_RULES,
+                              enabled: !!result.default_notification_enabled,
+                              method: "email",
+                              frequency: "weekly",
+                              email_owner: session.user_email,
+                              email_recipients:
+                                  result.default_notification_email_recipients,
+                              error: form.error
+                                  ? zodErrorsToJson(form.error)
+                                  : null,
+                          }
+                        : {
+                              rules: NOTIFICATION_FREQUENT_RULES,
+                              enabled: false,
+                              error: form.error
+                                  ? zodErrorsToJson(form.error)
+                                  : null,
+                          },
+                }),
+            );
+        },
+    );
 };
 
 export const registerWebApiRoutes = (webApi: WebApiHono) => {

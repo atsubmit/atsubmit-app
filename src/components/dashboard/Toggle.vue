@@ -9,7 +9,12 @@ defineProps<{
 
 <template>
     <label class="inline-flex items-center cursor-pointer">
-        <input type="checkbox" class="sr-only peer" v-model="model" />
+        <input
+            type="checkbox"
+            class="sr-only peer"
+            v-model="model"
+            v-bind="input"
+        />
 
         <div
             :class="[

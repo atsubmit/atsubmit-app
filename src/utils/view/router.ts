@@ -35,6 +35,11 @@ const DashboardDomainsSettingsLoader = () =>
 const DashboardNotificationsSettingsLoader = () =>
     import("@/loaders/DashboardNotificationSettingsLoader.vue");
 
+const DashboardFormListLoader = () =>
+    import("@/loaders/DashboardFormListLoader.vue");
+const DashboardCreateNewFormLoader = () =>
+    import("@/loaders/DashboardCreateNewFormLoader.vue");
+
 export const HTTP_STATUS_MAP: Record<string, AsyncComponentLoader> = {
     "404": Error404ViewAsyncLoader,
     "500": Error500ViewAsyncLoader,
@@ -62,4 +67,7 @@ export const PATH_MAP: Record<string, AsyncComponentLoader> = {
     "dashboard/settings/processing": DashboardProcessingSettingsLoader,
     "dashboard/settings/domains": DashboardDomainsSettingsLoader,
     "dashboard/settings/notifications": DashboardNotificationsSettingsLoader,
+
+    "dashboard/forms": DashboardFormListLoader,
+    "dashboard/forms/new": DashboardCreateNewFormLoader,
 };

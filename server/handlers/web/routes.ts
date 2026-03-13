@@ -240,7 +240,10 @@ export const registerWebRoutes = (web: WebHono) => {
         return c.html(htmlPage(c, {}));
     });
     dashboard.get("/forms", async (c) => {
-        return c.html(htmlPage(c, {}));
+        return c.html(htmlPage(c));
+    });
+    dashboard.get("/forms/new", async (c) => {
+        return c.html(htmlPage(c));
     });
     dashboard.get("/submissions", async (c) => {
         return c.html(htmlPage(c, {}));

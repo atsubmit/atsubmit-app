@@ -26,7 +26,7 @@ export interface UserHoneypotSettings {
 
     /**
      * Honeypot input name
-     * max length: 20
+     * max length: 64
      */
     default_honeypot_input_name?: string;
 

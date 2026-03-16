@@ -55,16 +55,18 @@ CREATE TABLE submissions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     form_id UUID NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
+	request_id text NOT NULL,
 
-    created_at TIMESTAMP NOT NULL DEFAULT now(),
+    ip_address inet NULL,
+	payload jsonb NULL,
+	raw_body text NULL,
+	raw_headers text NULL,
 
-    ip_address INET,
-    user_agent TEXT,
+	spam_score int2 DEFAULT 0 NOT NULL,
+	spam_reasons _text NULL,
+	spam_checked_at timestamp NULL,
 
-    payload JSONB NOT NULL,
-
-    spam_flag BOOLEAN DEFAULT FALSE
-
+    created_at timestamp DEFAULT now() NOT NULL
 );
 
 CREATE INDEX idx_submissions_form

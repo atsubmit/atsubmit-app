@@ -65,6 +65,10 @@ export const quickCreateNewFormService = async (
     return result.rows[0] || null;
 };
 
-export const createSubmissionEndpoint = (endpoint_slug: string) => {
-    return `https://api.atsubmit.com/f/${endpoint_slug}`;
+export const createSubmissionEndpoint = (
+    c: MainContext,
+    endpoint_slug: string,
+) => {
+    new URL(c.env.APP_PUBLIC_API_ENDPOINT);
+    return `${c.env.APP_PUBLIC_API_ENDPOINT}/f/${endpoint_slug}`;
 };

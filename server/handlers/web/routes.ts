@@ -308,6 +308,7 @@ export const registerWebRoutes = (web: WebHono) => {
                 context: {
                     formId: id,
                     endpointUrl: createSubmissionEndpoint(
+                        c,
                         setting.endpoint_slug,
                     ),
                     name: setting.name || "",
@@ -369,6 +370,7 @@ export const registerWebRoutes = (web: WebHono) => {
                     context: {
                         formId: id,
                         endpointUrl: createSubmissionEndpoint(
+                            c,
                             setting.endpoint_slug,
                         ),
                         name: setting.name || "",

@@ -19,7 +19,7 @@ const tabs: FormSettingsTab[] = [
     {
         id: "general",
         name: "General",
-        href: `/dashboard/form/${props.formId}/profile`,
+        href: `/dashboard/form/${props.formId}/general`,
         icon: User,
     },
     {

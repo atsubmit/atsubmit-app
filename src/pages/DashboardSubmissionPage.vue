@@ -5,13 +5,18 @@ import Table from "@/components/dashboard/Table.vue";
 import {
     Filter,
     Download,
-    MoreVertical,
     Shield,
     ChevronRight,
     ChevronLeft,
+    ShieldQuestionMark,
 } from "lucide-vue-next";
-import type { DashboardSubmissionRow } from "./DashboardSubmissionPage.types";
-import { computed, onBeforeMount, ref } from "vue";
+import type {
+    Badge,
+    DashboardSubmissionItem,
+    DashboardSubmissionRow,
+    HeaderPreview,
+} from "./DashboardSubmissionPage.types";
+import { computed, onMounted, ref } from "vue";
 
 const prosp = defineProps<{
     page?: number;
@@ -20,18 +25,18 @@ const prosp = defineProps<{
 }>();
 
 const submissions = ref<DashboardSubmissionRow[]>([]);
-const page = ref(1);
+const pageNUmber = ref(1);
 const itemPerPage = ref(10);
 const totalItems = ref(0);
 
 const startPosition = computed(() => {
     if (totalItems.value === 0) return 0;
-    return (page.value - 1) * itemPerPage.value + 1;
+    return (pageNUmber.value - 1) * itemPerPage.value + 1;
 });
 
 const endPosition = computed(() => {
     if (totalItems.value === 0) return 0;
-    return Math.min(totalItems.value, page.value * itemPerPage.value);
+    return Math.min(totalItems.value, pageNUmber.value * itemPerPage.value);
 });
 
 const paginateFooter = computed(() => {
@@ -41,19 +46,19 @@ const paginateFooter = computed(() => {
     return `Showing ${startPosition.value}-${endPosition.value} of ${totalItems.value} submissions`;
 });
 const hasPrev = computed(() => {
-    return page.value > 1;
+    return pageNUmber.value > 1;
 });
 
 const totalPages = computed(() => {
     return Math.ceil(totalItems.value / itemPerPage.value);
 });
 const hasNext = computed(() => {
-    return page.value < totalPages.value;
+    return pageNUmber.value < totalPages.value;
 });
 
 const visiblePages = computed(() => {
     const total = totalPages.value;
-    const current = page.value;
+    const current = pageNUmber.value;
 
     if (total <= 3) {
         return Array.from({ length: total }, (_, i) => i + 1);
@@ -90,11 +95,11 @@ const paginationItems = computed<PaginationItem[]>(() => {
     const firstPage = pages[0];
     const lastPage = pages[pages.length - 1];
 
-    if (typeof pages[0] === "number" && pages[0] > 1) {
+    if (typeof firstPage === "number" && firstPage > 1) {
         items.push({ type: "page", value: 1 });
     }
 
-    if (typeof pages[0] === "number" && pages[0] > 2) {
+    if (typeof firstPage === "number" && firstPage > 2) {
         items.push({ type: "ellipsis" });
     }
 
@@ -115,13 +120,110 @@ const paginationItems = computed<PaginationItem[]>(() => {
     return items;
 });
 
-const getPage = () => {
-    return fetch("/webapi/dashboard/submissions", {
-        method: "GET",
-    });
+const buildSubmissionSummary = (
+    headers: Record<string, any>,
+): HeaderPreview => {
+    // normalize
+    const normalized: Record<string, string> = {};
+
+    for (const key in headers) {
+        const v = headers[key];
+        normalized[key.toLowerCase()] = Array.isArray(v) ? v[0] : String(v);
+    }
+
+    const get = (k: string) => normalized[k];
+
+    const ua = get("user-agent") || "";
+
+    const contentTypeBadges: Badge[] = [];
+    const contentType = get("content-type") || "";
+
+    if (contentType.includes("application/json")) {
+        contentTypeBadges.push({
+            label: "JSON",
+            tone: "blue",
+            hint: "application/json",
+        });
+    } else if (contentType.includes("application/x-www-form-urlencoded")) {
+        contentTypeBadges.push({
+            label: "Form",
+            tone: "green",
+            hint: "application/x-www-form-urlencoded",
+        });
+    } else if (contentType.includes("multipart/form-data")) {
+        contentTypeBadges.push({
+            label: "Multipart",
+            tone: "yellow",
+            hint: "multipart/form-data",
+        });
+    } else {
+        contentTypeBadges.push({
+            label: "Other",
+            tone: "gray",
+            hint: contentType,
+        });
+    }
+
+    return {
+        ua,
+        contentTypeBadges: contentTypeBadges,
+    };
 };
 
-onBeforeMount(async () => {
+const getPage = async () => {
+    const page = pageNUmber.value;
+    const ipp = itemPerPage.value;
+
+    const params = new URLSearchParams();
+    params.set("page", page.toString());
+    params.set("ipp", ipp.toString());
+
+    submissions.value = [];
+
+    const result = await fetch(`/webapi/dashboard/submissions?${params}`, {
+        method: "GET",
+    });
+
+    if (result.ok) {
+        const json: unknown = await result.json();
+        if (json && typeof json === "object") {
+            if ("items" in json && !!json.items && Array.isArray(json.items)) {
+                const items: DashboardSubmissionItem[] = json.items;
+                submissions.value = items.map((item) => {
+                    const submittedAt = new Date(
+                        item.created_at,
+                    ).toLocaleString();
+                    const submittedAtUTC = new Date(
+                        item.created_at,
+                    ).toUTCString();
+                    return {
+                        id: item.id,
+                        detailHref: `/dashboard/submission/${item.id}`,
+
+                        submittedAt: submittedAt,
+                        submittedAtUTC: submittedAtUTC,
+                        formHref: `/dashboard/form/${item.endpoint_slug}`,
+                        formName: item.form_name,
+
+                        preview: item.raw_headers
+                            ? buildSubmissionSummary(item.raw_headers)
+                            : null,
+
+                        spamScore: item.spam_score,
+                        spamReasons: item.spam_reasons,
+                        spamCheckedAt: item.spam_checked_at,
+                    } satisfies DashboardSubmissionRow;
+                });
+            }
+
+            if ("total" in json && typeof json.total === "number") {
+                totalItems.value = json.total;
+            }
+        }
+    }
+};
+
+onMounted(async () => {
     const result = await getPage();
 });
 </script>
@@ -145,52 +247,114 @@ onBeforeMount(async () => {
         </DashboardHeader>
 
         <Card class="p-0">
-            <Table :headers="['Form', 'Preview', 'Time', 'Status', 'Actions']">
+            <Table :headers="['Id', 'Time', 'Form', 'Preview', 'Status']">
                 <tr
-                    v-for="sub in submissions"
-                    :key="sub.id"
+                    v-for="(item, index) in submissions"
+                    :key="index"
                     class="hover:bg-muted/50 transition-colors cursor-pointer"
                 >
                     <td class="px-4 py-4 font-medium">
-                        {{ sub.form }}
-                    </td>
-
-                    <td
-                        class="px-4 py-4 text-sm text-muted-foreground truncate max-w-[300px]"
-                    >
-                        {{
-                            Object.entries(sub.data)
-                                .map(([k, v]) => `${k}: ${v}`)
-                                .join(", ")
-                        }}
+                        <a
+                            :href="item.detailHref"
+                            class="underline text-blue-500"
+                        >
+                            <span>#</span>
+                            <span>{{ item.id.slice(0, 8) }}</span>
+                        </a>
                     </td>
 
                     <td class="px-4 py-4 text-sm text-muted-foreground">
-                        {{ sub.time }}
+                        <p :title="item.submittedAtUTC">
+                            {{ item.submittedAt }}
+                        </p>
+                    </td>
+
+                    <td class="px-4 py-4 font-medium">
+                        <a
+                            :href="item.formHref"
+                            class="underline text-blue-500"
+                        >
+                            {{ item.formName }}
+                        </a>
+                    </td>
+
+                    <td
+                        class="px-4 py-4 text-sm text-muted-foreground truncate max-w-75"
+                    >
+                        <div
+                            v-if="item.preview"
+                            class="p-3 rounded-lg space-y-2 text-sm"
+                        >
+                            <!-- User Agent -->
+                            <div
+                                class="flex-1 min-w-0"
+                                :title="item.preview.ua"
+                            >
+                                <span class="text-gray-500 font-bold shrink-0"
+                                    >User Agent:</span
+                                >
+                                <p class="text-sm">
+                                    {{ item.preview.ua }}
+                                </p>
+                            </div>
+
+                            <!-- Content Type -->
+                            <div class="flex gap-2 items-center">
+                                <span class="text-gray-500 font-bold shrink-0"
+                                    >Content Type:</span
+                                >
+
+                                <div class="flex flex-wrap gap-1">
+                                    <span
+                                        v-for="b in item.preview
+                                            .contentTypeBadges"
+                                        :key="b.label"
+                                        class="px-2 py-0.5 text-xs rounded-md"
+                                        :class="{
+                                            'bg-blue-100 text-blue-700':
+                                                b.tone === 'blue',
+                                            'bg-green-100 text-green-700':
+                                                b.tone === 'green',
+                                            'bg-yellow-100 text-yellow-700':
+                                                b.tone === 'yellow',
+                                            'bg-red-100 text-red-700':
+                                                b.tone === 'red',
+                                            'bg-gray-100 text-gray-700':
+                                                b.tone === 'gray',
+                                        }"
+                                        :title="b.hint"
+                                    >
+                                        {{ b.label }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     </td>
 
                     <td class="px-4 py-4">
-                        <span
-                            v-if="sub.spam"
-                            class="flex items-center gap-1 text-xs font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded-full w-fit"
-                        >
-                            <Shield :size="12" /> Spam
-                        </span>
+                        <template v-if="typeof item.spamScore === 'number'">
+                            <span
+                                v-if="item.spamScore"
+                                class="flex items-center gap-1 text-xs font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded-full w-fit"
+                            >
+                                <Shield :size="12" /> Spam
+                            </span>
+                            <span
+                                v-else
+                                class="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full w-fit"
+                            >
+                                <Shield :size="12" /> Safe
+                            </span>
+                        </template>
                         <span
                             v-else
-                            class="flex items-center gap-1 text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-full w-fit"
+                            class="flex items-center gap-1 text-xs font-bold text-yellow-500 bg-emerald-500/10 px-2 py-1 rounded-full w-fit"
                         >
-                            <Shield :size="12" /> Safe
+                            <ShieldQuestionMark :size="12" /> Unscored
                         </span>
                     </td>
 
-                    <td class="px-4 py-4">
-                        <button
-                            class="p-2 rounded-lg hover:bg-muted text-muted-foreground"
-                        >
-                            <MoreVertical :size="18" />
-                        </button>
-                    </td>
+                    <td class="px-4 py-4"></td>
                 </tr>
             </Table>
 
@@ -213,9 +377,10 @@ onBeforeMount(async () => {
                             v-if="item.type === 'page'"
                             class="px-2 py-1 rounded hover:bg-muted"
                             :class="{
-                                'bg-muted font-medium': item.value === page,
+                                'bg-muted font-medium':
+                                    item.value === pageNUmber,
                             }"
-                            @click="page = item.value"
+                            @click="pageNUmber = item.value"
                         >
                             {{ item.value }}
                         </button>

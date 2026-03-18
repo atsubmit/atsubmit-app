@@ -5,7 +5,6 @@ import { newSubmissionService } from "@server/modules/ApiSubmission/NewSubmissio
 import { ApiHono } from "@server/types";
 import { getClientIp } from "@server/utils/request";
 import { validateIP } from "@server/utils/validate/ip";
-import { randomBytes } from "node:crypto";
 
 export const registerApiRoutes = (api: ApiHono) => {
     api.get("now", async (c) => {
@@ -24,16 +23,15 @@ export const registerApiRoutes = (api: ApiHono) => {
         const headers = sanitizeHeaders(rawHeaders);
         const ip = getClientIp(c) || "";
         const safeIP = validateIP(ip) || "";
-        const rid = c.get("reqId") || randomBytes(32).toString("hex");
 
         const result = await newSubmissionService(c, {
             slugId: slugId,
-            requestId: rid,
             ipAddress: safeIP,
             payload: data || null,
             rawHeaders: JSON.stringify(headers.headers),
             rawBody: rawBody || null,
         });
+        console.log(c.get("reqId"), result);
 
         if (result) {
             return c.json(

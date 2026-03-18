@@ -55,12 +55,11 @@ CREATE TABLE submissions (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     form_id UUID NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
-	request_id text NOT NULL,
 
     ip_address inet NULL,
 	payload jsonb NULL,
 	raw_body text NULL,
-	raw_headers text NULL,
+	raw_headers jsonb NULL,
 
 	spam_score int2 DEFAULT 0 NOT NULL,
 	spam_reasons _text NULL,

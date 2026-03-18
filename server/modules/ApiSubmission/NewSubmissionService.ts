@@ -5,7 +5,6 @@ import { SubmissionPayload } from "./BodyParserService";
 export const newSubmissionService = async (
     c: MainContext,
     data: {
-        requestId: String;
         slugId: string;
         ipAddress?: string | null;
         userAgent?: string | null;
@@ -18,7 +17,6 @@ export const newSubmissionService = async (
         INSERT INTO submissions (
             form_id,
             ip_address,
-            request_id,
             raw_headers,
             raw_body,
             payload
@@ -28,8 +26,7 @@ export const newSubmissionService = async (
             $2,
             $3,
             $4,
-            $5,
-            $6::jsonb
+            $5::jsonb
         FROM forms f
         WHERE f.endpoint_slug = $1
 
@@ -38,7 +35,6 @@ export const newSubmissionService = async (
     const params = [
         data.slugId,
         data.ipAddress,
-        data.requestId,
         data.rawHeaders || null,
         data.rawBody || null,
         JSON.stringify(data.payload || null),

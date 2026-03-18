@@ -119,7 +119,7 @@ async function regenerateToken() {
                         <template #append>
                             <button
                                 type="button"
-                                class="px-4 py-2 rounded-lg bg-transparent font-medium hover:opacity-90 transition-all flex items-center gap-2"
+                                class="px-3 py-2 rounded-lg bg-transparent font-medium hover:opacity-90 transition-all flex items-center gap-2"
                                 :class="[
                                     copied.endpointUrl
                                         ? 'text-green-500 '

@@ -120,11 +120,18 @@ function isParentActive(path: string) {
                     <a
                         :href="item.href"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group"
-                        :class="
-                            isActive(item.href) || isParentActive(item.href)
+                        :class="[
+                            (
+                                item.children?.length
+                                    ? isParentActive(item.href)
+                                    : isActive(item.href)
+                            )
                                 ? 'bg-apple-blue/10 text-apple-blue'
-                                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                        "
+                                : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                            {
+                                'justify-center': isSidebarCollapsed,
+                            },
+                        ]"
                     >
                         <component :is="item.icon" :size="20" />
 
@@ -135,10 +142,9 @@ function isParentActive(path: string) {
 
                     <div
                         v-if="
-                            (!isSidebarCollapsed &&
-                                item.children &&
-                                isActive(item.href)) ||
-                            isParentActive(item.href)
+                            !isSidebarCollapsed &&
+                            item.children &&
+                            (isActive(item.href) || isParentActive(item.href))
                         "
                         class="ml-9 mt-1 space-y-1"
                     >
@@ -148,7 +154,7 @@ function isParentActive(path: string) {
                             :href="child.href"
                             class="block px-3 py-1.5 text-sm rounded-lg"
                             :class="
-                                isParentActive(child.href)
+                                isActive(child.href)
                                     ? 'text-apple-blue font-medium'
                                     : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                             "
@@ -190,7 +196,11 @@ function isParentActive(path: string) {
                             :href="item.href"
                             class="flex items-center gap-3 p-2 rounded-lg"
                             :class="
-                                isActive(item.href) || isParentActive(item.href)
+                                (
+                                    item.children?.length
+                                        ? isParentActive(item.href)
+                                        : isActive(item.href)
+                                )
                                     ? 'bg-apple-blue/10 text-apple-blue'
                                     : ''
                             "
@@ -208,7 +218,12 @@ function isParentActive(path: string) {
                                 v-for="child in item.children"
                                 :key="child.name"
                                 :href="child.href"
-                                class="block text-sm text-muted-foreground"
+                                class="block text-sm"
+                                :class="
+                                    isActive(child.href)
+                                        ? 'text-apple-blue font-medium'
+                                        : 'text-muted-foreground'
+                                "
                                 @click="isMobileMenuOpen = false"
                             >
                                 {{ child.name }}

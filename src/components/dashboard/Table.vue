@@ -20,7 +20,7 @@ defineProps<{
             </thead>
 
             <tbody class="divide-y divide-border">
-                <slot />
+                <slot></slot>
             </tbody>
         </table>
     </div>

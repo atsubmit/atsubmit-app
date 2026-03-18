@@ -53,7 +53,7 @@
             <!-- append -->
             <div
                 v-if="$slots.append"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground dark:text-muted-foreground/80 flex items-center"
+                class="absolute right-px top-1/2 -translate-y-1/2 text-muted-foreground dark:text-muted-foreground/80 flex items-center"
             >
                 <slot name="append"></slot>
             </div>

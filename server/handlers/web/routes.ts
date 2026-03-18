@@ -67,7 +67,10 @@ import {
     upsertProfileInfo,
 } from "@server/modules/DashboardProfileSettings/ProfileInfoService";
 import { SUPPORTED_TIMEZONE_OPTIONS } from "@server/modules/DashboardProfileSettings/SupportedTimezone";
-import { paginateSubmission } from "@server/modules/DashboardSubmissions/GetSubmissionsService";
+import {
+    getSubmission,
+    paginateSubmission,
+} from "@server/modules/DashboardSubmissions/GetSubmissionsService";
 import { deleteSessionCookie } from "@server/modules/Session/CookieService";
 import {
     deleteSessionService,
@@ -666,10 +669,33 @@ export const registerWebRoutes = (web: WebHono) => {
         return c.html(htmlPage(c, {}));
     });
     dashboard.get("/submission/:id", async (c) => {
+        const sid = c.get("sid") || "";
+        const session = await getSessionService(c, sid);
+        if (!session) {
+            return c.html(
+                htmlPage(c, {
+                    httpStatus: 401,
+                }),
+            );
+        }
+
+        const result = await getSubmission(c, {
+            user_id: session.user_id,
+            id: c.req.param("id"),
+        });
+
+        if (!result) {
+            return c.html(
+                htmlPage(c, {
+                    httpStatus: 404,
+                }),
+            );
+        }
+
         return c.html(
             htmlPage(c, {
                 context: {
-                    submission: {},
+                    submission: result,
                 },
             }),
         );
@@ -1095,7 +1121,10 @@ export const registerWebApiRoutes = (webApi: WebApiHono) => {
         });
 
         return c.json({
-            submissions: list,
+            items: list.items,
+            total: list.total,
+            page: list.page,
+            limit: list.limit,
         });
     });
 };

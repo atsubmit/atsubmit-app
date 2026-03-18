@@ -43,26 +43,32 @@ export const resetPasswordService = async (
         WHERE
                 user_id = $2
                 AND provider = 'email';
-
+        `
+    const query2 = `
         UPDATE password_reset_tokens
         SET used_at = now()
         WHERE
-                user_id = $2
+                user_id = $1
                 AND used_at IS NULL;
     `;
+    console.log(1)
     await lazyPoolExecute(c, async (client) => {
         await client.query("BEGIN");
         try {
-            await client.query<Pick<User, "email">>(query, [
+            await client.query(query, [
                 data.password,
                 data.user_id,
             ]);
-
+            await client.query(query2, [
+                data.user_id,
+            ]);
             await client.query("COMMIT");
         } catch (e) {
             await client.query("ROLLBACK");
 
             throw e;
         }
+        console.log(3)
     });
+    console.log(2)
 };

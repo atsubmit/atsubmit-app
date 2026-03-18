@@ -50,6 +50,7 @@ CREATE TABLE auth_identities (
     password_hash TEXT,
 
     created_at TIMESTAMP NOT NULL DEFAULT now(),
+    updated_at TIMESTAMP NOT NULL DEFAULT now(),
 
     CONSTRAINT unique_provider_identity
     UNIQUE(provider, provider_user_id)

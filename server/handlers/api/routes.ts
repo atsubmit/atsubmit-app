@@ -18,7 +18,7 @@ export const registerApiRoutes = (api: ApiHono) => {
     api.on(["GET", "POST"], "f/:id", async (c) => {
         const rawBody = await c.req.raw.clone().text();
         const data = await parseSubmission(c);
-        const formId = c.req.param("id");
+        const slugId = c.req.param("id");
 
         const rawHeaders = c.req.header();
         const headers = sanitizeHeaders(rawHeaders);
@@ -27,13 +27,12 @@ export const registerApiRoutes = (api: ApiHono) => {
         const rid = c.get("reqId") || randomBytes(32).toString("hex");
 
         const result = await newSubmissionService(c, {
-            formId: formId,
+            slugId: slugId,
             requestId: rid,
             ipAddress: safeIP,
             payload: data || null,
             rawHeaders: JSON.stringify(headers.headers),
             rawBody: rawBody || null,
-            spamFlag: false,
         });
 
         if (result) {

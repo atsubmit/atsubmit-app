@@ -67,6 +67,7 @@ import {
     upsertProfileInfo,
 } from "@server/modules/DashboardProfileSettings/ProfileInfoService";
 import { SUPPORTED_TIMEZONE_OPTIONS } from "@server/modules/DashboardProfileSettings/SupportedTimezone";
+import { paginateSubmission } from "@server/modules/DashboardSubmissions/GetSubmissionsService";
 import { deleteSessionCookie } from "@server/modules/Session/CookieService";
 import {
     deleteSessionService,
@@ -198,6 +199,7 @@ export const registerWebRoutes = (web: WebHono) => {
                 const canUse = await verifyCanResetPassword(c, form.email);
                 if (canUse) {
                     const token = randomBytes(32).toString("hex");
+                    console.log(c.env.APP_PUBLIC_ENDPOINT);
                     const url = new URL(
                         "reset-password",
                         c.env.APP_PUBLIC_ENDPOINT,
@@ -656,12 +658,21 @@ export const registerWebRoutes = (web: WebHono) => {
             slug: slug,
             token: token,
         });
-        console.log(result);
+        console.log('result', result);
 
         return c.redirect("/dashboard/forms");
     });
-    dashboard.get("/submissions", async (c) => {
+    dashboard.get("/submissions", (c) => {
         return c.html(htmlPage(c, {}));
+    });
+    dashboard.get("/submission/:id", async (c) => {
+        return c.html(
+            htmlPage(c, {
+                context: {
+                    submission: {},
+                },
+            }),
+        );
     });
     dashboard.get("/settings", async (c) => {
         return c.html(htmlPage(c, {}));
@@ -1069,4 +1080,22 @@ export const registerWebApiRoutes = (webApi: WebApiHono) => {
             });
         },
     );
+
+    dashboard.get("/submissions", async (c) => {
+        const sid = c.get("sid") || "";
+        const session = await getSessionService(c, sid);
+        if (!session) {
+            return c.json(null, 401);
+        }
+
+        const list = await paginateSubmission(c, {
+            user_id: session.user_id,
+            page: 1,
+            limit: 10,
+        });
+
+        return c.json({
+            submissions: list,
+        });
+    });
 };

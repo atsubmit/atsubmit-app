@@ -6,7 +6,7 @@ export const newSubmissionService = async (
     c: MainContext,
     data: {
         requestId: String;
-        formId: string;
+        slugId: string;
         ipAddress?: string | null;
         userAgent?: string | null;
         payload?: SubmissionPayload | null;
@@ -15,27 +15,28 @@ export const newSubmissionService = async (
     },
 ) => {
     const query = `
-                INSERT INTO submissions (
-                form_id,
-                ip_address,
-                request_id,
-                raw_headers,
-                raw_body,
-                payload
+        INSERT INTO submissions (
+            form_id,
+            ip_address,
+            request_id,
+            raw_headers,
+            raw_body,
+            payload
         )
-        VALUES (
-                $1,
-                $2,
-                $3,
-                $4,
-                $5,
-                $6::jsonb
-        )
+        SELECT
+            f.id,       -- get form_id from slug
+            $2,
+            $3,
+            $4,
+            $5,
+            $6::jsonb
+        FROM forms f
+        WHERE f.endpoint_slug = $1
 
         RETURNING id
 	`;
     const params = [
-        data.formId,
+        data.slugId,
         data.ipAddress,
         data.requestId,
         data.rawHeaders || null,

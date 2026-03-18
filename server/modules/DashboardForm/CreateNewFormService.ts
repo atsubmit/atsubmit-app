@@ -33,31 +33,65 @@ export const quickCreateNewFormService = async (
             notification_email_recipients
         )
         SELECT
-            $1,                     -- user_id
-            $2,                     -- form_name
-            $3,                     -- endpoint_slug
-            $4,                     -- submit_token
+            $1,  -- user_id
+            $2,  -- form_name
+            $3,  -- endpoint_slug
+            $4,  -- submit_token
 
-            us.default_allowed_domains,
-            us.default_disallowed_domains,
+            COALESCE(us.default_allowed_domains, $5),
+            COALESCE(us.default_disallowed_domains, $6),
 
-            us.default_honeypot_enabled,
-            us.default_honeypot_class_name,
-            us.default_honeypot_input_name,
-            us.default_honeypot_hidden_style,
+            COALESCE(us.default_honeypot_enabled, $7),
+            COALESCE(us.default_honeypot_class_name, $8),
+            COALESCE(us.default_honeypot_input_name, $9),
+            COALESCE(us.default_honeypot_hidden_style, $10),
 
-            us.default_spam_filter_enabled,
+            COALESCE(us.default_spam_filter_enabled, $11),
 
-            us.default_notification_enabled,
-            us.default_notification_frequency,
-            us.default_notification_via_email,
-            us.default_notification_email_recipients
+            COALESCE(us.default_notification_enabled, $12),
+            COALESCE(us.default_notification_frequency, $13),
+            COALESCE(us.default_notification_via_email, $14),
+            COALESCE(us.default_notification_email_recipients, $15)
+        FROM LATERAL (
+            SELECT *
+            FROM user_settings us
+            WHERE us.user_id = $1
+        ) us
+        RIGHT JOIN (SELECT 1) dummy ON TRUE
+    `;
 
-        FROM user_settings us
-        WHERE us.user_id = $1
-        RETURNING id;
-	`;
-    const params = [data.user_id, data.name, data.slug, data.token];
+    const defaultAllowedDomains: string[] = []; // $5 (ARRAY)
+    const defaultDisallowedDomains: string[] = []; // $6 (ARRAY)
+    const defaultHoneypotEnabled = false; // $7 (boolean)
+    const defaultHoneypotClassName = null; // $8
+    const defaultHoneypotInputName = null; // $9
+    const defaultHoneypotHiddenStyle = null; // $10
+    const defaultSpamFilterEnabled = false; // $11 (boolean)
+    const defaultNotificationEnabled = false; // $12 (boolean)
+    const defaultNotificationFrequency = null; // $13 ('instant', 'daily', etc.)
+    const defaultNotificationViaEmail = false; // $14 (boolean)
+    const defaultNotificationRecipients: string[] = []; // $15 (ARRAY)
+
+    // Example params
+    const params = [
+        data.user_id, // $1
+        data.name, // $2
+        data.slug, // $3
+        data.token, // $4
+        defaultAllowedDomains, // $5 (ARRAY)
+        defaultDisallowedDomains, // $6 (ARRAY)
+        defaultHoneypotEnabled, // $7 (boolean)
+        defaultHoneypotClassName, // $8
+        defaultHoneypotInputName, // $9
+        defaultHoneypotHiddenStyle, // $10
+        defaultSpamFilterEnabled, // $11 (boolean)
+        defaultNotificationEnabled, // $12 (boolean)
+        defaultNotificationFrequency, // $13 ('instant', 'daily', etc.)
+        defaultNotificationViaEmail, // $14 (boolean)
+        defaultNotificationRecipients, // $15 (ARRAY)
+    ];
+    console.log(params);
+
     const result = await lazyPoolExecute(c, async (client) => {
         return client.query(query, params);
     });

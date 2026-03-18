@@ -48,6 +48,12 @@ const DashboardEditFormDomainSettingsLoader = () =>
 const DashboardEditFormNotificationSettingsLoader = () =>
     import("@/loaders/DashboardEditFormNotificationSettingsLoader.vue");
 
+const DashboardSubmissionListLoader = () =>
+    import("@/loaders/DashboardSubmissionListLoader.vue");
+const DashboardSubmissionDetailLoader = () =>
+    import("@/loaders/DashboardSubmissionDetailLoader.vue");
+
+
 export const HTTP_STATUS_MAP: Record<string, AsyncComponentLoader> = {
     "404": Error404ViewAsyncLoader,
     "500": Error500ViewAsyncLoader,
@@ -84,4 +90,7 @@ export const PATH_MAP: Record<string, AsyncComponentLoader> = {
     "dashboard/form/:id/domains": DashboardEditFormDomainSettingsLoader,
     "dashboard/form/:id/notifications":
         DashboardEditFormNotificationSettingsLoader,
+
+    "dashboard/submissions": DashboardSubmissionListLoader,
+    "dashboard/submission/:id": DashboardSubmissionDetailLoader,
 };

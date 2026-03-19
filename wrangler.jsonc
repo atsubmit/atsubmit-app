@@ -21,6 +21,12 @@
 			"binding": "KV",
 			"preview_id": "kv_preview_id"
 		}
+	],
+	"services": [
+		{
+			"binding": "ATSUBMIT_MAIL",
+			"service": "atsubmit-mail"
+		}
 	]
 	/**
 	 * Smart Placement

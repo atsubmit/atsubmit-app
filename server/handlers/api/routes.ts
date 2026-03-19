@@ -5,8 +5,25 @@ import { newSubmissionService } from "@server/modules/ApiSubmission/NewSubmissio
 import { ApiHono } from "@server/types";
 import { getClientIp } from "@server/utils/request";
 import { validateIP } from "@server/utils/validate/ip";
+import { signRequest } from "@atsubmit/cloudflare-sign";
 
 export const registerApiRoutes = (api: ApiHono) => {
+    api.get("mail", async (c) => {
+        const signed = await signRequest({
+            secret: c.env.MAIL_WORKER_CRYPTO_SECRET,
+            method: "POST",
+            url: new URL("/mail/send/signup-verify", 'https://email.worker.local'),
+        });
+        const request = await c.env.ATSUBMIT_MAIL.fetch(signed.url, {
+            method: signed.method,
+            headers: signed.headers,
+            body: signed.body,
+        });
+        const text = await request.text();
+        console.log([request.status, text]);
+
+        return c.json(null, 200);
+    });
     api.get("now", async (c) => {
         const result = await lazyPoolExecute(c, (client) => {
             return client.query<{ now: string }>("SELECT NOW() as now");

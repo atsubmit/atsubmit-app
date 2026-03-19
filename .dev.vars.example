@@ -5,3 +5,4 @@ APP_PUBLIC_ENDPOINT=http://localhost:5173
 APP_PUBLIC_API_ENDPOINT=http://localhost:5173/api
 DB_URL=postgresql://username:password@localhost:5432/db-name
 SESSION_SECRET=
+MAIL_WORKER_CRYPTO_SECRET=

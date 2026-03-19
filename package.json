@@ -13,6 +13,7 @@
 		"cf-typegen": "wrangler types"
 	},
 	"dependencies": {
+		"@atsubmit/cloudflare-sign": "file:packages/atsubmit-cloudflare-sign-0.0.1.tgz",
 		"@tailwindcss/vite": "^4.2.1",
 		"hono": "^4.12.6",
 		"lucide-vue-next": "^0.577.0",

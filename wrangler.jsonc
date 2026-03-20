@@ -30,7 +30,14 @@
 			"binding": "ATSUBMIT_MAIL",
 			"service": "atsubmit-mail"
 		}
-	]
+	],
+	"vars": {
+		"APP_ENV": "production",
+		"APP_SESSION_NAME": "atsubmit",
+		"APP_SESSION_DOMAIN": "app.atsubmit.com",
+		"APP_PUBLIC_ENDPOINT": "https://app.atsubmit.com",
+		"APP_PUBLIC_API_ENDPOINT": "https://app.atsubmit.com/api"
+	},
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

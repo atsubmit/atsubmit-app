@@ -14,6 +14,8 @@ export const ErrorViewAsyncLoader = () =>
 export const HomeLoader = () => import("@/loaders/HomeLoader.vue");
 export const LoginLoader = () => import("@/loaders/LoginLoader.vue");
 export const SignUpLoader = () => import("@/loaders/SignUpLoader.vue");
+export const SignUpSuccessLoader = () => import("@/loaders/SignUpSuccessLoader.vue");
+export const EmailVerifiedLoader = () => import("@/loaders/EmailVerifiedLoader.vue");
 export const ForgotPasswordLoader = () =>
     import("@/loaders/ForgotPasswordLoader.vue");
 export const ForgotPasswordSubmittedLoader = () =>
@@ -68,6 +70,8 @@ export const PATH_MAP: Record<string, AsyncComponentLoader> = {
     "": HomeLoader,
     login: LoginLoader,
     signup: SignUpLoader,
+    'signup-success': SignUpSuccessLoader,
+    'verify-email': EmailVerifiedLoader,
     "forgot-password": ForgotPasswordLoader,
     "forgot-password-submitted": ForgotPasswordSubmittedLoader,
     "reset-password": ResetPasswordLoader,

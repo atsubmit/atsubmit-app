@@ -17,6 +17,7 @@
 		"@tailwindcss/vite": "^4.2.1",
 		"hono": "^4.12.6",
 		"lucide-vue-next": "^0.577.0",
+		"motion-v": "^2.0.1",
 		"pg": "^8.20.0",
 		"simple-icons": "^16.11.0",
 		"tailwindcss": "^4.2.1",

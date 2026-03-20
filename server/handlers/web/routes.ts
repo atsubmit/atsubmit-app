@@ -20,6 +20,13 @@ import {
     emailSignupService,
     verifyCanSignUpWithEmail,
 } from "@server/modules/Authentication/SignUpService";
+import {
+    hasSignUpSuccessCookie,
+    resetSignUpSuccessCookie,
+    setSignUpSuccessCookie,
+} from "@server/modules/Authentication/SignUpSuccessService";
+import { validateVerifyEmailQueryService } from "@server/modules/Authentication/VerifyEmailQueryService";
+import { updateEmailVerifiedService } from "@server/modules/Authentication/VerifyEmailService";
 import { addDefaultDomainBodyService } from "@server/modules/DashboardDomainSettings/AddDefaultDomainBodyService";
 import { addDefaultDomainService } from "@server/modules/DashboardDomainSettings/AddDefaultDomainService";
 import { deleteDefaultDomainBodyService } from "@server/modules/DashboardDomainSettings/DeleteDefaultDomainBodyService";
@@ -71,6 +78,7 @@ import {
     getSubmission,
     paginateSubmission,
 } from "@server/modules/DashboardSubmissions/GetSubmissionsService";
+import { sendEmailSignupVerification } from "@server/modules/SendEmail/SendEmailSignupVerificationService";
 import { deleteSessionCookie } from "@server/modules/Session/CookieService";
 import {
     deleteSessionService,
@@ -143,6 +151,51 @@ export const registerWebRoutes = (web: WebHono) => {
         },
     );
 
+    web.get("/signup-success", async (c) => {
+        if (!(await hasSignUpSuccessCookie(c))) {
+            return c.html(htmlPage(c, { httpStatus: 404 }), 404);
+        }
+
+        await resetSignUpSuccessCookie(c);
+
+        return c.html(htmlPage(c, {}));
+    });
+    web.get("/verify-email", validateVerifyEmailQueryService(), async (c) => {
+        const query = await c.req.valid("query");
+
+        const result = await updateEmailVerifiedService(c, {
+            token: query.token,
+        });
+
+        if (result.status === "invalid") {
+            return c.html(
+                htmlPage(c, {
+                    httpStatus: 401,
+                }),
+                401,
+            );
+        }
+
+        if (result.status === "expired") {
+            return c.html(
+                htmlPage(c, {
+                    httpStatus: 410,
+                }),
+                410,
+            );
+        }
+
+        if (result.status === "used") {
+            return c.html(
+                htmlPage(c, {
+                    httpStatus: 410,
+                }),
+                410,
+            );
+        }
+
+        return c.html(htmlPage(c, {}));
+    });
     web.get("/signup", noSessionRequiredMiddleware("/dashboard"), async (c) => {
         return c.html(htmlPage(c, {}));
     });
@@ -164,15 +217,36 @@ export const registerWebRoutes = (web: WebHono) => {
                     );
                 }
 
-                await emailSignupService(c, form);
+                const token = randomBytes(32).toString("hex");
+                await emailSignupService(c, {
+                    email: form.email,
+                    password: form.password,
+                    verifyToken: token,
+                });
 
-                return c.html(
-                    htmlPage(c, {
-                        context: {
-                            email: form.email,
-                        },
-                    }),
-                );
+                try {
+                    const url = new URL(
+                        "/verify-email",
+                        c.env.APP_PUBLIC_ENDPOINT,
+                    );
+                    url.searchParams.set("token", token);
+
+                    console.log(c.get("reqId"), url.toString(), form.email);
+                    const result = await sendEmailSignupVerification(c, {
+                        link: url.toString(),
+                        send_to: form.email,
+                    });
+                    console.log(
+                        c.get("reqId"),
+                        result.status,
+                        await result.text(),
+                    );
+                } catch (error) {
+                    console.error(c.get("reqId"), error);
+                }
+
+                await setSignUpSuccessCookie(c);
+                return c.redirect("/signup-success");
             } catch (error) {
                 console.error(c.get("reqId"), error);
                 return c.html(

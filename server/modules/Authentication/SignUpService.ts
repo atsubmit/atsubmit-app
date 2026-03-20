@@ -28,34 +28,54 @@ export const emailSignupService = async (
     credential: {
         email: string;
         password: string;
+        verifyToken: string;
     },
 ) => {
+    const query = `
+        WITH new_user AS (
+            INSERT INTO users
+                (email, email_verified)
+            VALUES
+                ($1, FALSE)
+            RETURNING id
+        ),
+        new_identity AS (
+            INSERT INTO auth_identities (
+                user_id,
+                provider,
+                password_hash
+            )
+            SELECT
+                id,
+                $2,
+                crypt($3, gen_salt('bf'))
+            FROM new_user
+        ),
+        new_token AS (
+            INSERT INTO email_verification_tokens (
+                user_id,
+                token,
+                expires_at
+            )
+            SELECT
+                id,
+                encode(digest($4, 'sha256'), 'hex'),
+                now() + interval '24 hours'
+            FROM new_user
+            RETURNING token
+        )
+
+        SELECT token FROM new_token;
+    `;
     await lazyPoolExecute(c, async (client) => {
         await client.query("BEGIN");
         try {
-            await client.query<Pick<User, "email">>(
-                `
-				WITH new_user AS (
-					INSERT INTO users
-						(email, email_verified)
-					VALUES
-						($1, FALSE)
-					RETURNING id
-				)
-
-				INSERT INTO auth_identities (
-					user_id,
-					provider,
-					password_hash
-				)
-				SELECT
-					id,
-					$2,
-					crypt($3, gen_salt('bf'))
-				FROM new_user;
-        	`,
-                [credential.email, "email", credential.password],
-            );
+            await client.query(query, [
+                credential.email,
+                "email",
+                credential.password,
+                credential.verifyToken,
+            ]);
 
             await client.query("COMMIT");
         } catch (e) {

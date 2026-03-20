@@ -92,3 +92,20 @@ ON password_reset_tokens(token_hash);
 
 CREATE INDEX idx_reset_expiry
 ON password_reset_tokens(expires_at);
+
+
+-- =====================================================
+-- Email Verification Tokens
+-- =====================================================
+CREATE TABLE email_verification_tokens (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+
+    token TEXT UNIQUE NOT NULL,
+
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP,
+
+    created_at TIMESTAMP DEFAULT now()
+);

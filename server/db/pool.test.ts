@@ -1,5 +1,4 @@
 import { afterEach, beforeEach, vi } from "vitest";
-
 import { describe, expect, it } from "vitest";
 import { getPool } from "./pool";
 import { Pool } from "pg";
@@ -10,6 +9,7 @@ describe("getPool", () => {
         vi.mock("pg", () => {
             const mockClient = {
                 release: vi.fn(),
+                query: vi.fn(),
             };
 
             const mockPool = {

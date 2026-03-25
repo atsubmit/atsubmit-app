@@ -27,8 +27,8 @@ export default defineConfig({
         },
     },
     test: {
+        exclude: ["test/**/*.utils.test.ts", "server/**/*.utils.test.ts"],
         include: ["test/**/*.test.ts", "server/**/*.test.ts"],
         setupFiles: ["./vitest.worker.setup.ts"],
     },
-
 });

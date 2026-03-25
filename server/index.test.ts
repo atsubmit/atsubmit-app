@@ -25,8 +25,5 @@ describe("Example", () => {
         const res = await app.request("/this-path-is-not-exist", {}, env);
         expect(res.status).toStrictEqual(404);
         expect(await res.text()).include('data-status="404"');
-
-        consoleLog(spyConsoleLog.mock.calls);
-        consoleLog(spyConsoleError.mock.calls);
     });
 });

@@ -1,7 +1,13 @@
 import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { contextStorage } from "hono/context-storage";
-import { ApiHono, MainHono, WebApiHono, WebHono, WebhookHono } from "@server/types";
+import {
+    ApiHono,
+    MainHono,
+    WebApiHono,
+    WebHono,
+    WebhookHono,
+} from "@server/types";
 import { htmlPage } from "@server/utils/view";
 import {
     registerWebApiRoutes,
@@ -13,6 +19,8 @@ import { setupWebApiRoutes, setupWebRoutes } from "@server/handlers/web/setup";
 import { randomBytes } from "crypto";
 import { registerWebhookRoutes } from "./handlers/webhook/routes";
 import { setupWebhookRoutes } from "./handlers/webhook/setup";
+import { AbuseIpMiddleware } from "./modules/AbuseRequest/AbuseIpMiddleware";
+import { ScanPathMiddleware } from "./modules/AbuseRequest/ScanPathMiddleware";
 
 const app: MainHono = new Hono();
 
@@ -34,6 +42,9 @@ app.use((c, next) => {
 
     return handler(c, next);
 });
+
+app.use(AbuseIpMiddleware);
+app.use(ScanPathMiddleware);
 
 /**
  * 1. RESPONSE DATA (JSON) FOR VIEW

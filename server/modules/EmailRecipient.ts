@@ -18,6 +18,7 @@ export type EmailRecipientStatusReason =
     | "complaint"
     | "suppression"
     | "manual"
+    | "reject"
     | "provider_sync"
     | "unknown";
 

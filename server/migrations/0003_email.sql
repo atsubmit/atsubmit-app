@@ -2,6 +2,7 @@ CREATE TABLE email_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     provider TEXT NOT NULL,
+    external_id TEXT,
     payload JSONB NOT NULL,
 
     response_status TEXT,

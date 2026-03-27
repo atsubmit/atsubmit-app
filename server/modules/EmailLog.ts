@@ -1,17 +1,16 @@
 import type { Timestamp, UUID } from "@server/modules/Fields";
 
-export type EmailStatus = "queued" | "sent" | "failed" | "bounced" | string;
-
 export interface EmailLog {
-  id: UUID;
+    id: UUID;
 
-  submission_id: UUID;
+    account_id: UUID | null;
 
-  recipient_email: string;
+    provider: string;
+    external_id: string | null;
+    payload: Record<string, unknown>;
 
-  status: EmailStatus;
+    response_status: string;
+    response_body: string;
 
-  provider_message_id: string | null;
-
-  created_at: Timestamp;
+    created_at: Timestamp;
 }

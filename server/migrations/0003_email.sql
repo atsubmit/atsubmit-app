@@ -1,6 +1,9 @@
 CREATE TABLE email_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
+    -- tenant-id
+    account_id UUID,
+
     provider TEXT NOT NULL,
     external_id TEXT,
     payload JSONB NOT NULL,
@@ -14,6 +17,9 @@ CREATE TABLE email_logs (
 
 CREATE TABLE incoming_webhook_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    -- tenant-id
+    account_id UUID,
 
     provider TEXT NOT NULL,
     event_type TEXT NOT NULL,

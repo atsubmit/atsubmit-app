@@ -66,6 +66,7 @@ export interface EmailRecipient {
 
     /**
      * Reason for current status (source of truth explanation)
+     * - aws: https://docs.aws.amazon.com/ses/latest/dg/event-publishing-retrieving-sns-contents.html
      */
     status_reason: EmailRecipientStatusReason | null;
 

@@ -1,5 +1,74 @@
 export const awsSnsNotificationForSes = [
     {
+        "eventType": "Reject",
+        "mail": {
+            "timestamp": "2026-03-27T09:54:28.107Z",
+            "source": "noreply@atsubmit.com",
+            "sourceArn": "arn:aws:ses:us-east-1:486431272817:identity/atsubmit.com",
+            "sendingAccountId": "486431272817",
+            "messageId": "0100019d2eb7748b-7b357ab2-d2c1-4605-9575-ca8cb6bcf2cf-000000",
+            "destination": [
+                "nguyenhy311@gmail.com"
+            ],
+            "headersTruncated": false,
+            "headers": [
+                {
+                    "name": "From",
+                    "value": "noreply@atsubmit.com"
+                },
+                {
+                    "name": "To",
+                    "value": "nguyenhy311@gmail.com"
+                },
+                {
+                    "name": "Subject",
+                    "value": "Send Bounce Mail"
+                },
+                {
+                    "name": "MIME-Version",
+                    "value": "1.0"
+                },
+                {
+                    "name": "Content-Type",
+                    "value": "multipart/mixed;  boundary=\"----=_Part_62004_599376455.1774605268107\""
+                }
+            ],
+            "commonHeaders": {
+                "from": [
+                    "noreply@atsubmit.com"
+                ],
+                "to": [
+                    "nguyenhy311@gmail.com"
+                ],
+                "messageId": "0100019d2eb7748b-7b357ab2-d2c1-4605-9575-ca8cb6bcf2cf-000000",
+                "subject": "Send Bounce Mail"
+            },
+            "tags": {
+                "ses:source-tls-version": [
+                    "TLSv1.3"
+                ],
+                "ses:operation": [
+                    "SendEmail"
+                ],
+                "ses:configuration-set": [
+                    "my-first-configuration-set"
+                ],
+                "ses:source-ip": [
+                    "115.77.252.76"
+                ],
+                "ses:from-domain": [
+                    "atsubmit.com"
+                ],
+                "ses:caller-identity": [
+                    "iam_mrsay132"
+                ]
+            }
+        },
+        "reject": {
+            "reason": "Bad content"
+        }
+    },
+    {
         "eventType": "Bounce",
         "bounce": {
             "feedbackId": "<feedbackId>",

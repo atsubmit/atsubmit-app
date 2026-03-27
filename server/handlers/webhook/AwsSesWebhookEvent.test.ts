@@ -11,6 +11,7 @@ import {
     AWS_SNS_WEBHOOK_EVENT_TYPE_SES_BOUNCE,
     AWS_SNS_WEBHOOK_EVENT_TYPE_SES_COMPLAINT,
     AWS_SNS_WEBHOOK_EVENT_TYPE_SES_DELIVERY,
+    AWS_SNS_WEBHOOK_EVENT_TYPE_SES_REJECT,
     AWS_SNS_WEBHOOK_EVENT_TYPE_SES_SEND,
     AWS_SNS_WEBHOOK_EVENT_TYPE_SES_UNKNOWN,
 } from "@server/modules/IncomingWebhookEvent";
@@ -74,9 +75,10 @@ describe("AWS_SES", () => {
             Complaint: AWS_SNS_WEBHOOK_EVENT_TYPE_SES_COMPLAINT,
             Delivery: AWS_SNS_WEBHOOK_EVENT_TYPE_SES_DELIVERY,
             Send: AWS_SNS_WEBHOOK_EVENT_TYPE_SES_SEND,
+            Reject: AWS_SNS_WEBHOOK_EVENT_TYPE_SES_REJECT,
         };
 
-        for (let index = 1; index < awsSnsNotificationForSes.length; index++) {
+        for (let index = 0; index < awsSnsNotificationForSes.length; index++) {
             const payload = awsSnsNotificationForSes[index];
             const response = await app.request(
                 "/webhook/aws/ses/0ba971ed74210dad183e1d71d63c33",

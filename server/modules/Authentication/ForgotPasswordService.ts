@@ -1,25 +1,42 @@
 import { lazyPoolExecute } from "@server/db/pool";
 import { MainContext } from "@server/types";
+import { PasswordResetTokens } from "../PasswordResetTokens";
+import { User } from "./User";
 
 export const verifyCanResetPassword = async (c: MainContext, email: string) => {
     const query = `
-	SELECT 1
+	SELECT
+		u.email as email
+		, prt.created_at as created_at
 	FROM password_reset_tokens prt
-	JOIN users u
+	RIGHT JOIN users u
 		ON u.id = prt.user_id
 	WHERE
 		u.email = $1
 		AND u.deleted_at IS NULL
-		AND prt.created_at > now() - interval '60 seconds'
 	ORDER BY
 		prt.created_at DESC
 	LIMIT 1;
     `;
     const result = await lazyPoolExecute(c, async (client) => {
-        return client.query(query, [email]);
+        return client.query<{
+            email: User["email"];
+            created_at: PasswordResetTokens["created_at"];
+        }>(query, [email]);
     });
 
-    return result.rowCount === 0;
+    const row = result.rows[0] || null;
+
+    if (!row?.email) {
+        // RIGHT JOIN + LIMIT 1
+        // => there're always 1 row if email is valid
+        return false;
+    }
+
+    const created_at = new Date(row.created_at).valueOf();
+    const diff = Date.now() - created_at;
+
+    return diff > 10e3;
 };
 
 export const insertPasswordResetTokenRecord = async (

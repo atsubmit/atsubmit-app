@@ -94,6 +94,7 @@ import { WebHono, WebApiHono } from "@server/types";
 import { htmlPage } from "@server/utils/view";
 import { zodErrorsToJson } from "@server/utils/zod/error";
 import { randomBytes } from "node:crypto";
+import { sendEmailResetPasswordService } from "@server/modules/SendEmail/SendEmailResetPasswordService";
 
 export const registerWebRoutes = (web: WebHono) => {
     web.get("/logout", sessionRequiredMiddleware("/login"), async (c) => {
@@ -330,9 +331,10 @@ export const registerWebRoutes = (web: WebHono) => {
                         token: token,
                     });
 
-                    console.log("========================");
-                    console.log("RESET URL", url.toString());
-                    console.log("========================");
+                    await sendEmailResetPasswordService(c, {
+                        link: url.toString(),
+                        send_to: form.email,
+                    });
                 }
 
                 return c.redirect("/forgot-password-submitted");

@@ -1,6 +1,6 @@
-import { lazyPoolExecute } from "@server/db/pool";
 import { MainContext } from "@server/types";
 import { IncomingWebhookEvent } from "../IncomingWebhookEvent";
+import { sendEmail } from "../SendEmail/SendEmailService";
 
 export const saveIncomingWebhookEventService = async (
     c: MainContext,
@@ -9,37 +9,9 @@ export const saveIncomingWebhookEventService = async (
         "provider" | "event_type" | "external_id" | "payload"
     >,
 ) => {
-    const query = `
-        INSERT INTO incoming_webhook_events (
-			  provider
-			, event_type
-			, external_id
-			, payload
-			, status
-			, attempts
-			, created_at
-        )
-        VALUES (
-			  $1
-			, $2
-			, $3
-			, $4
-			, $5
-			, $6
-			, now()
-        )
-	`;
-    const params = [
-        data.provider,
-        data.event_type,
-        data.external_id,
-        data.payload,
-        "pending",
-        0,
-    ];
-    const result = await lazyPoolExecute(c, async (client) => {
-        return client.query(query, params);
+    const reqId = c.get("reqId");
+    const response = await sendEmail(c, "/enqueue/aws-ses-event", data, {
+        reqId: reqId,
     });
-
-    return result.rows[0] || null;
+    console.log(reqId, response.status, await response.text());
 };

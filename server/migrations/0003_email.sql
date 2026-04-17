@@ -58,7 +58,7 @@ CREATE TABLE email_recipients (
     -- active | bounced | complained | suppressed | invalid
 
     status_reason TEXT,
-    -- bounce | complaint | suppression | manual | provider_sync
+    -- bounce | complaint | suppression | reject | unknown
 
     source TEXT NOT NULL,
     -- system | webhook | manual | import

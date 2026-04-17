@@ -17,9 +17,7 @@ export type EmailRecipientStatusReason =
     | "bounce"
     | "complaint"
     | "suppression"
-    | "manual"
     | "reject"
-    | "provider_sync"
     | "unknown";
 
 /**
